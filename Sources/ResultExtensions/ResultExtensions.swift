@@ -4,8 +4,8 @@
 import Combine
 import Foundation
 
-extension Result where Success == Data {
-    public func decode<T: Decodable>(decoder: T.Type) -> Result<T, Error> {
+public extension Result where Success == Data {
+    func decode<T: Decodable>(decoder: T.Type) -> Result<T, Error> {
         do {
             let successData = try get()
             let dataModel = try JSONDecoder().decode(decoder, from: successData)
@@ -17,8 +17,8 @@ extension Result where Success == Data {
     }
 }
 
-extension Result where Success: Encodable {
-    public func encode() -> Result<Data, Error> {
+public extension Result where Success: Encodable {
+    func encode() -> Result<Data, Error> {
         do {
             let successDataModel = try get()
             let rawData = try JSONEncoder().encode(successDataModel)
@@ -30,8 +30,8 @@ extension Result where Success: Encodable {
     }
 }
 
-extension Result {
-    public func fold(success successHandler: (Success) -> Void,
+public extension Result {
+    func fold(success successHandler: (Success) -> Void,
                      failure failureHandler: (Error) -> Void) {
         
         switch self {
@@ -43,14 +43,14 @@ extension Result {
     }
 }
 
-extension Result {
-    public func send(through subject: PassthroughSubject<Self, Never>) {
+public extension Result {
+    func send(through subject: PassthroughSubject<Self, Never>) {
         subject.send(self)
     }
 }
 
-extension Result {
-    public func asyncMap<NewSuccess>(_ transform: (Success) async -> NewSuccess) async -> Result<NewSuccess, Failure> {
+public extension Result {
+    func asyncMap<NewSuccess>(_ transform: (Success) async -> NewSuccess) async -> Result<NewSuccess, Failure> {
         switch self {
         case .success(let success):
             return await .success(transform(success))
@@ -59,7 +59,7 @@ extension Result {
         }
     }
     
-    public func asyncMapError(_ transform: (Failure) async -> Failure) async -> Result<Success, Failure> {
+    func asyncMapError(_ transform: (Failure) async -> Failure) async -> Result<Success, Failure> {
         switch self {
         case .success(let success):
             return .success(success)
@@ -69,8 +69,8 @@ extension Result {
     }
 }
 
-extension Result {
-    public func asyncFlatMap<NewSuccess>(_ transform: (Success) async -> Result<NewSuccess, Failure>) async -> Result<NewSuccess, Failure> {
+public extension Result {
+    func asyncFlatMap<NewSuccess>(_ transform: (Success) async -> Result<NewSuccess, Failure>) async -> Result<NewSuccess, Failure> {
         switch self {
         case .success(let success):
             return await transform(success)
@@ -79,7 +79,7 @@ extension Result {
         }
     }
     
-    public func asyncFlatMapError(_ transform: (Failure) async -> Result<Success, Failure>) async -> Result<Success, Failure> {
+    func asyncFlatMapError(_ transform: (Failure) async -> Result<Success, Failure>) async -> Result<Success, Failure> {
         switch self {
         case .success(let success):
             return .success(success)
